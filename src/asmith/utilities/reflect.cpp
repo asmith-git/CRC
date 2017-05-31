@@ -377,6 +377,11 @@ namespace asmith {
 		return tmp;
 	}
 
+	/*!
+		\brief Reverse the bit order of a signed 64 bit value.
+		\param aValue The value to reflect.
+		\return The reflected value.
+	*/
 	int64_t reflect(int64_t aValue) throw() {
 		int64_t tmp;
 		uint8_t* const dst = reinterpret_cast<uint8_t*>(&tmp);
@@ -392,6 +397,12 @@ namespace asmith {
 		return tmp;
 	}
 
+	/*!
+		\brief Reverse the bit order of an arbitrary length value.
+		\param aInput The first byte of the value to reflect.
+		\param aOutput The first byte of the reflected value.
+		\param aBits The number of bits to reflect.
+	*/
 	void reflect(const void* aInput, void* aOutput, size_t aBits) throw() {
 		// Reflect byte values
 		const uint8_t* const src = reinterpret_cast<const uint8_t*>(aInput);
