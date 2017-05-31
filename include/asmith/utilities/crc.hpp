@@ -127,10 +127,11 @@ namespace asmith {
 		*/
 		static checksum_t calculate(const void* aData, size_t aBytes) {
 			// Initialise the lookup table
-			static checksum_t  LOOKUP[256];
+			static checksum_t*  LOOKUP = nullptr;
 			static bool ONCE = true;
 			if(ONCE) {
 				ONCE = false;
+				LOOKUP = new checksum_t[256];
 				for(size_t i = 0; i < 256; ++i) {
 					LOOKUP[i] = table_value(i);
 				}
