@@ -17,38 +17,88 @@
 #include "reflect.hpp"
 
 namespace asmith {
-	template<class T, uint64_t POLYNOMIAL, bool REVERSE_DATA, bool REVERSED_OUT, uint64_t INITIAL_VALUE, uint64_t FINAL_XOR_VALUE, size_t WIDTH = 8 * sizeof(T)>
+	/*!
+		\brief Implements a configurable variant of CRC.
+		\tparam T The type of the checksum that is produced.
+		\tparam POLYNOMIAL The polynomial that is used to calculate the CRC lookup table.
+		\tparam REVERSE_DATA True if the input bytes should be reversed during calculation.
+		\tparam REVERSE_OUT	True if the output checksum should be not'd.
+		\tparam INITIAL_VALUE The initial value of the CRC checksum.
+		\tparam FINAL_XOR_VALUE The XOR value that is applied to the checksum before return.
+		\tparam WIDTH_ The width of the checksum in bits, this is automatically generated based on T by default.
+		\version 0.0
+		\date Created : 27th May 2017 Modified : 31st May 2017
+		\author Adam Smith
+	*/
+	template<class T, uint64_t POLYNOMIAL, bool REVERSE_DATA, bool REVERSED_OUT, uint64_t INITIAL_VALUE, uint64_t FINAL_XOR_VALUE, size_t WIDTH_ = 8 * sizeof(T)>
 	class crc {
 	public:
-		typedef T checksum_t;
+		typedef T checksum_t;	//!< The type of the checksum
+		enum {
+			WIDTH = WIDTH_	//!< The width of the checksum in bits
+		};
 	private:
+		/*!
+			\brief Reflect a byte from the input data.
+			\detail This is the specialisation for when REVERSE_DATA is true.
+			\param aByte The byte to reverse.
+			\return The reflected byte.
+		*/
 		template<bool R = REVERSE_DATA>
 		static inline typename std::enable_if<R, uint8_t>::type reflect_byte(const uint8_t aByte) {
 			return asmith::reflect(aByte);
 		}
-
+		/*!
+			\brief Reflect a byte from the input data.
+			\detail This is the specialisation for when REVERSE_DATA is false, returns aByte instead.
+			\param aByte The byte to reverse.
+			\return The reflected byte.
+		*/
 		template<bool R = REVERSE_DATA>
 		static inline typename std::enable_if<! R, uint8_t>::type reflect_byte(const uint8_t aByte) {
 			return aByte;
 		}
 
+		/*!
+			\brief Reflect a checksum value.
+			\detail This is the specialisation for when REVERSE_DATA is true and the checksum is a C++ primative size.
+			\param aValue The checksum to reverse.
+			\return The reflected checksum.
+		*/
 		template<bool R = REVERSE_DATA, size_t W = WIDTH>
-		static inline typename std::enable_if<R && (W == 8 || W == 16 || W == 32 || W == 64) && sizeof(checksum_t) * 8 == W, checksum_t>::type reflect_table(checksum_t aValue) {
+		static inline typename std::enable_if<R && (W == 8 || W == 16 || W == 32 || W == 64) && sizeof(checksum_t) * 8 == W, checksum_t>::type reflect_checksum(checksum_t aValue) {
 			return asmith::reflect(aValue);
 		}
 
+		/*!
+			\brief Reflect a checksum value.
+			\detail This is the specialisation for when REVERSE_DATA is true and the checksum is not a C++ primative size.
+			\param aValue The checksum to reverse.
+			\return The reflected checksum.
+		*/
 		template<bool R = REVERSE_DATA, size_t W = WIDTH>
-		static inline typename std::enable_if<R && ((W != 8 && W != 16 && W != 32 && W != 64) || sizeof(checksum_t) * 8 != W), checksum_t>::type reflect_table(checksum_t aValue) {
+		static inline typename std::enable_if<R && ((W != 8 && W != 16 && W != 32 && W != 64) || sizeof(checksum_t) * 8 != W), checksum_t>::type reflect_checksum(checksum_t aValue) {
 			checksum_t tmp = 0;
 			asmith::reflect(&aValue, &tmp, WIDTH);
 			return tmp;
 		}
 
+		/*!
+			\brief Reflect a checksum value.
+			\detail This is the specialisation for when REVERSE_DATA is false, returns aValue instead.
+			\param aValue The checksum to reverse.
+			\return The reflected checksum.
+		*/
 		template<bool R = REVERSE_DATA>
-		static inline typename std::enable_if<!R, checksum_t>::type reflect_table(checksum_t aValue) {
+		static inline typename std::enable_if<!R, checksum_t>::type reflect_checksum(checksum_t aValue) {
 			return aValue;
 		}
-
+		
+		/*!
+			\brief Calculate a position in the lookup table.
+			\param aIndex The index of the lookup table to generate.
+			\return The lookup value.
+		*/
 		static checksum_t table_value(uint8_t aIndex) {
 			enum { LAST_BIT = 1 << (WIDTH - 1) };
 
@@ -59,10 +109,24 @@ namespace asmith {
 					(tmp << 1) ^ POLYNOMIAL :
 					(tmp << 1);
 			}
-			return reflect_table(tmp);
+			return reflect_checksum(tmp);
+		}
+
+		/*!
+			\brief Prevent an object of this class being created. 
+		*/
+		crc() {
+
 		}
 	public:
+		/*!
+			\brief Calculate a checksum.
+			\paramaData The address of the first byte of input data.
+			\param aBytes The number of bytes in the input.
+			\return The CRC checksum.
+		*/
 		static checksum_t calculate(const void* aData, size_t aBytes) {
+			// Initialise the lookup table
 			static checksum_t  LOOKUP[256];
 			static bool ONCE = true;
 			if(ONCE) {
@@ -72,17 +136,21 @@ namespace asmith {
 				}
 			}
 
+			// Initialise data
 			const uint8_t* const data = static_cast<const uint8_t*>(aData);
 			checksum_t	checksum = INITIAL_VALUE;
 
+			// Hash the input data
 			for(size_t i = 0; i < aBytes; ++i) {
 				checksum = REVERSE_DATA ?
 					(checksum >> 8) ^ LOOKUP[(checksum & 0xFF) ^ data[i]] :
 					(checksum << 8) ^ LOOKUP[((checksum >> (WIDTH - 8) & 0xFF)) ^ data[i]];
 			}
 
+			// If the width is not a C++ primative type then clear the trailing bits
 			if((8 * sizeof(checksum_t)) > WIDTH) checksum = checksum & ((1 << WIDTH) - 1);
 
+			// Xor the checksum and return it
 			return REVERSED_OUT ?
 				checksum ^ FINAL_XOR_VALUE :
 				~checksum ^ FINAL_XOR_VALUE;
