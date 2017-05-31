@@ -26,7 +26,7 @@ namespace asmith {
 		\tparam INITIAL_VALUE The initial value of the CRC checksum.
 		\tparam FINAL_XOR_VALUE The XOR value that is applied to the checksum before return.
 		\tparam WIDTH_ The width of the checksum in bits, this is automatically generated based on T by default.
-		\version 0.0
+		\version 1.0
 		\date Created : 27th May 2017 Modified : 31st May 2017
 		\author Adam Smith
 	*/
