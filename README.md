@@ -15,6 +15,9 @@ A simple to use CRC class for C++, with predefined configurations for common CRC
 1. CRC-64 does not currently work
 2. 12 CRC variants do not produce the correct checksums when tested, this is noted in a comment next to their typedefs
 
+### Requirements
+1. C++11
+
 ## Usage Examples
 ### Calculating a CRC-32 Checksum
 ```C++
