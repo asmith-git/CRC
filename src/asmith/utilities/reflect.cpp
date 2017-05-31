@@ -275,10 +275,20 @@ namespace asmith {
 		0b11111111  // 11111111 (255)
 	};
 
+	/*!
+		\brief Reverse the bit order of an unsigned 8 bit value.
+		\param aValue The value to reflect.
+		\return The reflected value.
+	*/
 	uint8_t reflect(uint8_t aValue) throw() {
 		return REFLECTION_LOOKUP[aValue];
 	}
 
+	/*!
+		\brief Reverse the bit order of an unsigned 16 bit value.
+		\param aValue The value to reflect.
+		\return The reflected value.
+	*/
 	uint16_t reflect(uint16_t aValue) throw() {
 		uint16_t tmp;
 		uint8_t* const dst = reinterpret_cast<uint8_t*>(&tmp);
@@ -288,6 +298,11 @@ namespace asmith {
 		return tmp;
 	}
 
+	/*!
+		\brief Reverse the bit order of an unsigned 32 bit value.
+		\param aValue The value to reflect.
+		\return The reflected value.
+	*/
 	uint32_t reflect(uint32_t aValue) throw() {
 		uint32_t tmp;
 		uint8_t* const dst = reinterpret_cast<uint8_t*>(&tmp);
@@ -299,6 +314,11 @@ namespace asmith {
 		return tmp;
 	}
 
+	/*!
+		\brief Reverse the bit order of an unsigned 64 bit value.
+		\param aValue The value to reflect.
+		\return The reflected value.
+	*/
 	uint64_t reflect(uint64_t aValue) throw() {
 		uint64_t tmp;
 		uint8_t* const dst = reinterpret_cast<uint8_t*>(&tmp);
@@ -314,6 +334,11 @@ namespace asmith {
 		return tmp;
 	}
 
+	/*!
+		\brief Reverse the bit order of a signed 8 bit value.
+		\param aValue The value to reflect.
+		\return The reflected value.
+	*/
 	int8_t reflect(int8_t aValue) throw() {
 		int8_t tmp;
 		uint8_t* const dst = reinterpret_cast<uint8_t*>(&tmp);
@@ -322,6 +347,11 @@ namespace asmith {
 		return tmp;
 	}
 
+	/*!
+		\brief Reverse the bit order of a signed 16 bit value.
+		\param aValue The value to reflect.
+		\return The reflected value.
+	*/
 	int16_t reflect(int16_t aValue) throw() {
 		int16_t tmp;
 		uint8_t* const dst = reinterpret_cast<uint8_t*>(&tmp);
@@ -331,6 +361,11 @@ namespace asmith {
 		return tmp;
 	}
 
+	/*!
+		\brief Reverse the bit order of a signed 32 bit value.
+		\param aValue The value to reflect.
+		\return The reflected value.
+	*/
 	int32_t reflect(int32_t aValue) throw() {
 		int32_t tmp;
 		uint8_t* const dst = reinterpret_cast<uint8_t*>(&tmp);
